@@ -1,0 +1,110 @@
+---
+title: "Carrie_Assigment4"
+output: html_notebook
+---
+
+#2. Loading packages
+```{r}
+library(tidyverse)
+library (ggthemes)
+```
+
+#3. importing data
+```{r}
+assignment4 = read_csv("a4_data.csv")
+```
+
+#4. Rows and columns
+```{r}
+nrow(assignment4) 
+ncol(assignment4) 
+#There are 3700 rows and 12 columns in this data file
+```
+
+# 5. Unique participants & trials
+```{r}
+#unique participants
+assignment4 %>% 
+pull (subject) %>% 
+unique()
+#There are 37 unique subjects
+
+#trials
+assignment4 %>%
+group_by(subject) %>%
+count()
+#Each subject did 100 trials
+```
+
+#6. Levels of variables
+```{r}
+assignment4 = assignment4 %>%
+mutate(prime_condition=as.factor(prime_condition))
+assignment4 = assignment4 %>%
+mutate(state = as.factor(state))
+levels(assignment4 %>% pull(prime_condition))
+levels(assignment4 %>% pull(state))
+```
+#prime_condition has 4 levels: :both", "phonological", "semantic", and "unrelated" 
+#state has 4 levels: "dontknow", "know", "other", and "tipoftongue"
+
+#7. Subsets of columns
+```{r}
+prime_information=
+assignment4 %>%
+select(subject, prime_condition)
+```
+
+#8. Subsets of rows
+```{r}
+phonological=
+assignment4 %>%
+  filter(prime_condition=="phonological" & accuracy==1)
+```
+
+#9. Summarizing accuracy per subject
+```{r}
+subject_acc=
+assignment4 %>%
+group_by(subject) %>%
+summarize(mean_acc=mean(accuracy))
+```
+
+#10. Summarizing accuracy per prime condition
+```{r}
+prime_acc=
+assignment4 %>%
+group_by(prime_condition) %>%
+summarize(mean_acc=mean(accuracy),
+          sd_acc=sd(accuracy))
+```
+
+#11. Histogram of subject accuracy
+```{r}
+subject_acc %>%
+ggplot(aes(x=mean_acc))+geom_histogram(binwidth=0.2, fill="brown", color='black', position = "identity")+theme_few()+labs(x='mean accuracy', y='count', title='histogram of mean accuracy')
+```
+
+#12. Bar plot of prime condition
+```{r}
+prime_acc %>%
+ggplot(aes(x=prime_condition, y=mean_acc))+geom_bar(fill="pink", color='navy', stat='identity')+theme_few()+labs(x='prime condition', y='mean accuracy', title='Mean accuracy across prime condition')
+```
+#13. Data interpretation
+#According to the bar graph, the mean accuracy in different prime conditions does vary. The mean accuracy is the highest in phonological condition and the lowest in the semantic condition.  
+
+#Extra credit
+#14. Summarizing accuracy per prime condition and state
+```{r}
+state_prime_acc=
+assignment4 %>%
+group_by(state, prime_condition) %>%
+summarize(mean_acc=mean(accuracy))
+```
+
+#15. Bar plot of prime condition and state
+```{r}
+state_prime_acc %>%
+ggplot(aes(x=prime_condition, y=mean_acc, fill=state)) + geom_col(position="dodge") + theme_few() + labs(x="prime condition", y="mean accuracy", title="Mean accuracy across prime condition and reported states")
+```
+
